@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GROKEY Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .sidebar-active { background-color: #3B82F6; color: white; }
+        .app-container { margin-left: 250px; }
+        @media (max-width: 768px) {
+            .app-container { margin-left: 0; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.mobile-open { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <!-- Login Screen -->
+    <div id="adminLogin" class="fixed inset-0 bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">🔐</div>
+                <h1 class="text-3xl font-bold text-gray-800">GROKEY Admin</h1>
+                <p class="text-gray-600 mt-2">Administrative Dashboard</p>
+            </div>
+            
+            <form id="adminLoginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
+                    <input type="email" id="adminEmail" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="adminPassword" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                </div>
+                <button type="submit" class="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition">
+                    Access Admin Panel
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">Demo Admin:</p>
+                <p class="text-xs text-gray-500">admin@grokey.com / admin123</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Panel -->
+    <div id="adminPanel" class="hidden">
+        <!-- Sidebar -->
+        <div class="sidebar fixed left-0 top-0 h-full w-64 bg-white shadow-lg z-40 transition-transform">
+            <div class="p-6 border-b">
+                <h1 class="text-xl font-bold text-gray-800">📚 GROKEY Admin</h1>
+                <p class="text-sm text-gray-600">Administrative Panel</p>
+            </div>
+            
+            <nav class="mt-6">
+                <button onclick="showAdminSection('dashboard')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition sidebar-active" id="nav-dashboard">
+                    <span class="text-xl mr-3">📊</span>
+                    <span>Dashboard</span>
+                </button>
+                
+                <button onclick="showAdminSection('users')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition" id="nav-users">
+                    <span class="text-xl mr-3">👥</span>
+                    <span>Users</span>
+                </button>
+                
+                <button onclick="showAdminSection('books')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition" id="nav-books">
+                    <span class="text-xl mr-3">📚</span>
+                    <span>Books</span>
+                </button>
+                
+                <button onclick="showAdminSection('transactions')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition" id="nav-transactions">
+                    <span class="text-xl mr-3">💰</span>
+                    <span>Transactions</span>
+                </button>
+                
+                <button onclick="showAdminSection('reports')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition" id="nav-reports">
+                    <span class="text-xl mr-3">📈</span>
+                    <span>Reports</span>
+                </button>
+                
+                <button onclick="showAdminSection('settings')" class="w-full flex items-center px-6 py-3 text-left hover:bg-gray-100 transition" id="nav-settings">
+                    <span class="text-xl mr-3">⚙️</span>
+                    <span>Settings</span>
+                </button>
+            </nav>
+            
+            <div class="absolute bottom-6 left-6 right-6">
+                <button onclick="adminLogout()" class="w-full bg-red-600 text-white py-3 rounded-xl font-semibold hover:bg-red-700 transition">
+                    🚪 Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobileMenuBtn" onclick="toggleMobileMenu()" class="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg">
+            <span class="text-xl">☰</span>
+        </button>
+
+        <!-- Main Content -->
+        <div class="app-container min-h-screen">
+            <!-- Header -->
+            <header class="bg-white shadow-sm p-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
+                        <p class="text-gray-600" id="pageSubtitle">Overview of GROKEY marketplace</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right">
+                            <p class="text-sm font-medium text-gray-800">Admin User</p>
+                            <p class="text-xs text-gray-600">admin@grokey.com</p>
+                        </div>
+                        <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-white font-semibold">A</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Total Users</p>
+                                <p class="text-3xl font-bold" id="totalUsers">0</p>
+                            </div>
+                            <div class="text-4xl opacity-80">👥</div>
+                        </div>
+                        <p class="text-sm opacity-75 mt-2">No users yet</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Total Books</p>
+                                <p class="text-3xl font-bold" id="totalBooksAdmin">0</p>
+                            </div>
+                            <div class="text-4xl opacity-80">📚</div>
+                        </div>
+                        <p class="text-sm opacity-75 mt-2">No books listed</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Transactions</p>
+                                <p class="text-3xl font-bold" id="totalTransactions">0</p>
+                            </div>
+                            <div class="text-4xl opacity-80">💰</div>
+                        </div>
+                        <p class="text-sm opacity-75 mt-2">No transactions yet</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-2xl">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm opacity-90">Revenue</p>
+                                <p class="text-3xl font-bold">$0</p>
+                            </div>
+                            <div class="text-4xl opacity-80">📈</div>
+                        </div>
+                        <p class="text-sm opacity-75 mt-2">No revenue yet</p>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Sales Overview</h3>
+                        <canvas id="salesChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <div class="bg-white p-6 rounded-2xl shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Categories</h3>
+                        <canvas id="categoryChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                    <div class="space-y-4" id="recentActivity">
+                        <!-- Activity items will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users-section" class="hidden p-6">
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">User Management</h3>
+                        <button onclick="showAddUserModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+                            ➕ Add User
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-3 px-4">User</th>
+                                    <th class="text-left py-3 px-4">Email</th>
+                                    <th class="text-left py-3 px-4">Books Listed</th>
+                                    <th class="text-left py-3 px-4">Join Date</th>
+                                    <th class="text-left py-3 px-4">Status</th>
+                                    <th class="text-left py-3 px-4">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTable">
+                                <!-- Users will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Books Section -->
+            <section id="books-section" class="hidden p-6">
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-semibold text-gray-800">Book Management</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="bookSearch" placeholder="Search books..." class="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            <button onclick="searchBooks()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+                                🔍
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="booksGrid">
+                        <!-- Books will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions-section" class="hidden p-6">
+                <div class="bg-white rounded-2xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-6">Transaction History</h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b">
+                                    <th class="text-left py-3 px-4">Transaction ID</th>
+                                    <th class="text-left py-3 px-4">Book</th>
+                                    <th class="text-left py-3 px-4">Buyer</th>
+                                    <th class="text-left py-3 px-4">Seller</th>
+                                    <th class="text-left py-3 px-4">Amount</th>
+                                    <th class="text-left py-3 px-4">Date</th>
+                                    <th class="text-left py-3 px-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactionsTable">
+                                <!-- Transactions will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports-section" class="hidden p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Revenue</h3>
+                        <canvas id="revenueChart" width="400" height="200"></canvas>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">User Growth</h3>
+                        <canvas id="userGrowthChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-2xl shadow-sm p-6 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Export Reports</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="exportReport('users')" class="bg-green-600 text-white p-4 rounded-xl hover:bg-green-700">
+                            📊 Export Users Report
+                        </button>
+                        <button onclick="exportReport('books')" class="bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700">
+                            📚 Export Books Report
+                        </button>
+                        <button onclick="exportReport('transactions')" class="bg-purple-600 text-white p-4 rounded-xl hover:bg-purple-700">
+                            💰 Export Transactions
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings-section" class="hidden p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Platform Settings</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Platform Name</label>
+                                <input type="text" value="GROKEY" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Commission Rate (%)</label>
+                                <input type="number" value="5" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Support Email</label>
+                                <input type="email" value="support@grokey.com" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700">
+                                Save Settings
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl shadow-sm p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Scanner Settings</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-gray-700">Enable AI Book Recognition</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="flex items-center">
+                                    <input type="checkbox" checked class="mr-2">
+                                    <span class="text-sm text-gray-700">Auto-fill Book Details</span>
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Recognition Confidence (%)</label>
+                                <input type="range" min="50" max="100" value="85" class="w-full">
+                                <div class="text-sm text-gray-600 mt-1">Current: 85%</div>
+                            </div>
+                            <button type="submit" class="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700">
+                                Update AI Settings
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50">
+        <span id="notificationText">Success!</span>
+    </div>
+
+    <script>
+        // Sample admin data - All cleared to zero
+        let users = [];
+        let adminBooks = [];
+        let transactions = [];
+        let orders = [];
+        let currentAdminSection = 'dashboard';
+        let currentBlockUserId = null;
+
+        // Admin login
+        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (email === 'admin@grokey.com' && password === 'admin123') {
+                document.getElementById('adminLogin').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                showAdminSection('dashboard');
+                initializeCharts();
+                showNotification('Welcome to GROKEY Admin Panel! 🎉');
+            } else {
+                showNotification('Invalid admin credentials', 'error');
+            }
+        });
+
+        // Show admin sections
+        function showAdminSection(section) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('sidebar-active');
+            });
+            
+            // Show selected section
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            document.getElementById(`nav-${section}`).classList.add('sidebar-active');
+            
+            // Update header
+            const titles = {
+                'dashboard': { title: 'Dashboard', subtitle: 'Overview of GROKEY marketplace' },
+                'users': { title: 'User Management', subtitle: 'Manage registered users' },
+                'books': { title: 'Book Management', subtitle: 'Oversee listed books' },
+                'transactions': { title: 'Transactions', subtitle: 'Monitor all transactions' },
+                'orders': { title: 'Order Management', subtitle: 'Track and manage orders' },
+                'reports': { title: 'Reports & Analytics', subtitle: 'View detailed reports' },
+                'settings': { title: 'Settings', subtitle: 'Configure platform settings' }
+            };
+            
+            document.getElementById('pageTitle').textContent = titles[section].title;
+            document.getElementById('pageSubtitle').textContent = titles[section].subtitle;
+            
+            currentAdminSection = section;
+            
+            // Load section-specific content
+            if (section === 'dashboard') {
+                renderRecentActivity();
+            } else if (section === 'users') {
+                renderUsersTable();
+            } else if (section === 'books') {
+                renderBooksGrid();
+            } else if (section === 'transactions') {
+                renderTransactionsTable();
+            } else if (section === 'orders') {
+                renderOrdersTable();
+            } else if (section === 'reports') {
+                initializeReportCharts();
+            }
+        }
+
+        // Render recent activity
+        function renderRecentActivity() {
+            const activities = [];
+            
+            const container = document.getElementById('recentActivity');
+            if (activities.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">📊</div>
+                        <p class="text-gray-600">No recent activity</p>
+                        <p class="text-sm text-gray-500 mt-2">Activity will appear here as users interact with the platform</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = activities.map(activity => `
+                    <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                        <span class="text-2xl mr-3">${activity.icon}</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800">${activity.text}</p>
+                            <p class="text-xs text-gray-500">${activity.time}</p>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render users table
+        function renderUsersTable() {
+            const container = document.getElementById('usersTable');
+            if (users.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-gray-500">
+                            <div class="text-4xl mb-2">👥</div>
+                            <p>No users registered yet</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = users.map(user => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-white text-sm font-semibold">${user.name.charAt(0)}</span>
+                                </div>
+                                <span class="font-medium">${user.name}</span>
+                            </div>
+                        </td>
+                        <td class="py-3 px-4">${user.email}</td>
+                        <td class="py-3 px-4">${user.booksListed}</td>
+                        <td class="py-3 px-4">${user.joinDate}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${
+                                user.status === 'Active' ? 'bg-green-100 text-green-800' : 
+                                user.status === 'Blocked' ? 'bg-red-100 text-red-800' : 
+                                'bg-gray-100 text-gray-800'
+                            }">
+                                ${user.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-800 mr-2">Edit</button>
+                            ${user.status === 'Blocked' ? 
+                                `<button onclick="unblockUser(${user.id})" class="text-green-600 hover:text-green-800 mr-2">Unblock</button>` :
+                                `<button onclick="showBlockUserModal(${user.id})" class="text-orange-600 hover:text-orange-800 mr-2">Block</button>`
+                            }
+                            <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-800">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render books grid
+        function renderBooksGrid() {
+            const container = document.getElementById('booksGrid');
+            if (adminBooks.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-8 text-gray-500">
+                        <div class="text-4xl mb-2">📚</div>
+                        <p>No books listed yet</p>
+                        <button onclick="showAddBookModal()" class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700">
+                            Add First Book
+                        </button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = adminBooks.map(book => `
+                    <div class="bg-gray-50 p-4 rounded-xl">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                            <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                        <p class="text-xs text-gray-500 mb-3">Seller: ${book.seller}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs px-2 py-1 rounded-full ${book.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${book.status}
+                            </span>
+                            <div class="space-x-2">
+                                <button onclick="editBook(${book.id})" class="text-blue-600 text-sm hover:text-blue-800">Edit</button>
+                                <button onclick="deleteBook(${book.id})" class="text-red-600 text-sm hover:text-red-800">Remove</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Render transactions table
+        function renderTransactionsTable() {
+            const container = document.getElementById('transactionsTable');
+            if (transactions.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            <div class="text-4xl mb-2">💰</div>
+                            <p>No transactions yet</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = transactions.map(txn => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4 font-mono text-sm">${txn.id}</td>
+                        <td class="py-3 px-4">${txn.book}</td>
+                        <td class="py-3 px-4">${txn.buyer}</td>
+                        <td class="py-3 px-4">${txn.seller}</td>
+                        <td class="py-3 px-4 font-semibold">$${txn.amount}</td>
+                        <td class="py-3 px-4">${txn.date}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${txn.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${txn.status}
+                            </span>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Render orders table
+        function renderOrdersTable() {
+            const container = document.getElementById('ordersTable');
+            if (orders.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            <div class="text-4xl mb-2">📦</div>
+                            <p>No orders yet</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = orders.map(order => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4 font-mono text-sm">${order.id}</td>
+                        <td class="py-3 px-4">${order.customer}</td>
+                        <td class="py-3 px-4">${order.book}</td>
+                        <td class="py-3 px-4 font-semibold">$${order.amount}</td>
+                        <td class="py-3 px-4">${order.date}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${getOrderStatusColor(order.status)}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-sm border border-gray-300 rounded px-2 py-1">
+                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function getOrderStatusColor(status) {
+            switch(status) {
+                case 'Pending': return 'bg-yellow-100 text-yellow-800';
+                case 'Processing': return 'bg-blue-100 text-blue-800';
+                case 'Shipped': return 'bg-purple-100 text-purple-800';
+                case 'Delivered': return 'bg-green-100 text-green-800';
+                case 'Cancelled': return 'bg-red-100 text-red-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // Sales Chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Sales',
+                        data: [0, 0, 0, 0, 0, 0],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Category Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['No Data'],
+                    datasets: [{
+                        data: [1],
+                        backgroundColor: ['#E5E7EB']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Initialize report charts
+        function initializeReportCharts() {
+            // Revenue Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#10B981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // User Growth Chart
+            const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+            new Chart(userGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'New Users',
+                        data: [0, 0, 0, 0, 0, 0],
+                        borderColor: '#8B5CF6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // User management functions
+        function editUser(id) {
+            const user = users.find(u => u.id === id);
+            showNotification(`Editing user: ${user.name}`);
+        }
+
+        function deleteUser(id) {
+            users = users.filter(u => u.id !== id);
+            renderUsersTable();
+            showNotification('User deleted successfully');
+        }
+
+        // Book management functions
+        function editBook(id) {
+            const book = adminBooks.find(b => b.id === id);
+            showNotification(`Editing book: ${book.title}`);
+        }
+
+        function deleteBook(id) {
+            adminBooks = adminBooks.filter(b => b.id !== id);
+            renderBooksGrid();
+            showNotification('Book removed successfully');
+        }
+
+        function searchBooks() {
+            const searchTerm = document.getElementById('bookSearch').value.toLowerCase();
+            const filteredBooks = adminBooks.filter(book => 
+                book.title.toLowerCase().includes(searchTerm) || 
+                book.author.toLowerCase().includes(searchTerm)
+            );
+            
+            const container = document.getElementById('booksGrid');
+            container.innerHTML = filteredBooks.map(book => `
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                        <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                    <p class="text-xs text-gray-500 mb-3">Seller: ${book.seller}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs px-2 py-1 rounded-full ${book.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                            ${book.status}
+                        </span>
+                        <div class="space-x-2">
+                            <button onclick="editBook(${book.id})" class="text-blue-600 text-sm hover:text-blue-800">Edit</button>
+                            <button onclick="deleteBook(${book.id})" class="text-red-600 text-sm hover:text-red-800">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Export functions
+        function exportReport(type) {
+            showNotification(`Exporting ${type} report... 📊`);
+            // Simulate export process
+            setTimeout(() => {
+                showNotification(`${type.charAt(0).toUpperCase() + type.slice(1)} report exported successfully!`);
+            }, 2000);
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('mobile-open');
+        }
+
+        // Admin logout
+        function adminLogout() {
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminLogin').classList.remove('hidden');
+            document.getElementById('adminLoginForm').reset();
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
+            
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Book management functions
+        function showAddBookModal() {
+            document.getElementById('addBookModal').classList.remove('hidden');
+        }
+
+        function closeAddBookModal() {
+            document.getElementById('addBookModal').classList.add('hidden');
+            document.getElementById('addBookForm').reset();
+        }
+
+        document.getElementById('addBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newBook = {
+                id: Date.now(),
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                category: document.getElementById('bookCategory').value,
+                price: parseFloat(document.getElementById('bookPrice').value),
+                condition: document.getElementById('bookCondition').value,
+                seller: document.getElementById('bookSeller').value,
+                description: document.getElementById('bookDescription').value,
+                status: 'Active'
+            };
+            
+            adminBooks.push(newBook);
+            renderBooksGrid();
+            closeAddBookModal();
+            showNotification('Book added successfully! 📚');
+            
+            // Update dashboard stats
+            document.getElementById('totalBooksAdmin').textContent = adminBooks.length;
+        });
+
+        // User blocking functions
+        function showBlockUserModal(userId) {
+            currentBlockUserId = userId;
+            const user = users.find(u => u.id === userId);
+            document.getElementById('blockUserName').textContent = user.name;
+            document.getElementById('blockUserModal').classList.remove('hidden');
+        }
+
+        function closeBlockUserModal() {
+            document.getElementById('blockUserModal').classList.add('hidden');
+            currentBlockUserId = null;
+        }
+
+        function confirmBlockUser() {
+            if (currentBlockUserId) {
+                const user = users.find(u => u.id === currentBlockUserId);
+                user.status = 'Blocked';
+                renderUsersTable();
+                closeBlockUserModal();
+                showNotification(`User ${user.name} has been blocked`);
+            }
+        }
+
+        function unblockUser(userId) {
+            const user = users.find(u => u.id === userId);
+            user.status = 'Active';
+            renderUsersTable();
+            showNotification(`User ${user.name} has been unblocked`);
+        }
+
+        // Order management functions
+        function updateOrderStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+                renderOrdersTable();
+                showNotification(`Order ${orderId} status updated to ${newStatus}`);
+            }
+        }
+
+        function filterOrders() {
+            const filter = document.getElementById('orderStatusFilter').value;
+            const filteredOrders = filter ? orders.filter(order => order.status === filter) : orders;
+            
+            const container = document.getElementById('ordersTable');
+            if (filteredOrders.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-8 text-center text-gray-500">
+                            <div class="text-4xl mb-2">📦</div>
+                            <p>No orders found${filter ? ` with status "${filter}"` : ''}</p>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                container.innerHTML = filteredOrders.map(order => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-3 px-4 font-mono text-sm">${order.id}</td>
+                        <td class="py-3 px-4">${order.customer}</td>
+                        <td class="py-3 px-4">${order.book}</td>
+                        <td class="py-3 px-4 font-semibold">$${order.amount}</td>
+                        <td class="py-3 px-4">${order.date}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-1 text-xs rounded-full ${getOrderStatusColor(order.status)}">
+                                ${order.status}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4">
+                            <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-sm border border-gray-300 rounded px-2 py-1">
+                                <option value="Pending" ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                <option value="Processing" ${order.status === 'Processing' ? 'selected' : ''}>Processing</option>
+                                <option value="Shipped" ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                <option value="Delivered" ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                <option value="Cancelled" ${order.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                            </select>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Add sample data function for testing
+        function addSampleData() {
+            // Add sample users
+            users.push(
+                { id: 1, name: "John Doe", email: "john@example.com", booksListed: 3, joinDate: "2024-01-15", status: "Active" },
+                { id: 2, name: "Jane Smith", email: "jane@example.com", booksListed: 5, joinDate: "2024-02-20", status: "Active" },
+                { id: 3, name: "Mike Johnson", email: "mike@example.com", booksListed: 2, joinDate: "2024-03-10", status: "Blocked" }
+            );
+
+            // Add sample books
+            adminBooks.push(
+                { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald", category: "Fiction", price: 12.99, condition: "Good", seller: "john@example.com", status: "Active" },
+                { id: 2, title: "Introduction to Algorithms", author: "Thomas H. Cormen", category: "Academic", price: 89.99, condition: "Like New", seller: "jane@example.com", status: "Active" }
+            );
+
+            // Add sample orders
+            orders.push(
+                { id: "ORD001", customer: "Alice Brown", book: "The Great Gatsby", amount: 12.99, date: "2024-03-15", status: "Pending" },
+                { id: "ORD002", customer: "Bob Green", book: "Introduction to Algorithms", amount: 89.99, date: "2024-03-14", status: "Processing" }
+            );
+
+            // Update dashboard
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalBooksAdmin').textContent = adminBooks.length;
+            document.getElementById('totalTransactions').textContent = orders.length;
+
+            showNotification('Sample data added for testing! 🎉');
+        }
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-focus on email field
+            document.getElementById('adminEmail').focus();
+            
+            // Add sample data button (for testing)
+            setTimeout(() => {
+                if (users.length === 0) {
+                    const notification = document.createElement('div');
+                    notification.innerHTML = `
+                        <div class="fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-xl shadow-lg z-50">
+                            <p class="mb-2">Want to test the admin features?</p>
+                            <button onclick="addSampleData(); this.parentElement.parentElement.remove();" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold">
+                                Add Sample Data
+                            </button>
+                        </div>
+                    `;
+                    document.body.appendChild(notification);
+                }
+            }, 3000);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e95fd247b0377e',t:'MTc1Nzc4NDY0Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
