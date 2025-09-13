@@ -3,867 +3,635 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GROKEY Admin Panel - Marketplace Management</title>
+    <title>GROKEY - Book Marketplace</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Custom Styles */
-        .sidebar {
-            transition: transform 0.3s ease;
-        }
-        
-        .sidebar-active {
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-        
-        .sidebar-active:hover {
-            background: linear-gradient(135deg, #2563EB, #1E40AF);
-        }
-        
-        .card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #f1f5f9;
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, #f8fafc, #ffffff);
-            border: 1px solid #e2e8f0;
-            border-radius: 20px;
-            padding: 28px;
-            transition: all 0.3s ease;
-        }
-        
-        .stats-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-        }
-        
-        .stats-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .badge-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-        
-        .badge-warning {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-danger {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .badge-info {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .badge-secondary {
-            background: #f1f5f9;
-            color: #475569;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #2563EB, #1E40AF);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        }
-        
-        .btn-secondary {
-            background: #f8fafc;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-        
-        .btn-secondary:hover {
-            background: #f1f5f9;
-            transform: translateY(-1px);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #DC2626, #B91C1C);
-            transform: translateY(-2px);
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #3B82F6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            backdrop-filter: blur(4px);
-        }
-        
-        .modal-content {
-            background: white;
-            border-radius: 20px;
-            padding: 0;
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-        }
-        
-        .modal-header {
-            padding: 24px 24px 0 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1f2937;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #6b7280;
-            padding: 4px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: #f3f4f6;
-            color: #374151;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 16px 20px;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            z-index: 1001;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-        
-        .notification-success {
-            background: linear-gradient(135deg, #10B981, #059669);
-        }
-        
-        .notification-error {
-            background: linear-gradient(135deg, #EF4444, #DC2626);
-        }
-        
-        .notification-warning {
-            background: linear-gradient(135deg, #F59E0B, #D97706);
-        }
-        
-        .notification-info {
-            background: linear-gradient(135deg, #3B82F6, #2563EB);
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        
-        .empty-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.6;
-        }
-        
-        .empty-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-        
-        .empty-description {
-            color: #6b7280;
-            font-size: 1rem;
-        }
-        
-        .hover-lift {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .hover-lift:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-        }
-        
-        .select {
-            padding: 8px 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: white;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .select:focus {
-            outline: none;
-            border-color: #3B82F6;
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                position: fixed;
-                z-index: 50;
-                height: 100vh;
-            }
-            
-            .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            
-            .stats-card {
-                padding: 20px;
-            }
-            
-            .stats-number {
-                font-size: 2rem;
-            }
-            
-            .modal-content {
-                width: 95%;
-                margin: 20px;
-            }
-        }
-        
-        .login-container {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .login-card {
-            background: white;
-            border-radius: 24px;
-            padding: 48px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .logo {
-            font-size: 2.5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #3B82F6, #1D4ED8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-align: center;
-            margin-bottom: 32px;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        .table th {
-            background: #f9fafb;
-            padding: 16px;
-            text-align: left;
-            font-weight: 600;
-            color: #374151;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .table td {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f3f4f6;
-        }
-        
-        .table tr:hover {
-            background: #f9fafb;
-        }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .slide-up { animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .bottom-nav-active { color: #3B82F6; }
+        .app-container { padding-bottom: 80px; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <!-- Admin Login Screen -->
-    <div id="adminLogin" class="login-container">
-        <div class="login-card">
-            <div class="logo">GROKEY</div>
-            <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Admin Panel</h2>
-            
-            <form id="adminLoginForm" class="space-y-6">
-                <div class="form-group">
-                    <label for="adminEmail" class="form-label">Admin Email</label>
-                    <input type="email" id="adminEmail" class="form-input" placeholder="admin@grokey.com" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="adminPassword" class="form-label">Password</label>
-                    <input type="password" id="adminPassword" class="form-input" placeholder="Enter password" required>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-full">
-                    Sign In to Admin Panel
-                </button>
-            </form>
-            
-            <div class="mt-6 p-4 bg-blue-50 rounded-xl">
-                <p class="text-sm text-blue-700 text-center">
-                    <strong>Demo Credentials:</strong><br>
-                    Email: admin@grokey.com<br>
-                    Password: admin123
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin Panel -->
-    <div id="adminPanel" class="hidden min-h-screen bg-gray-50">
-        <!-- Sidebar -->
-        <aside class="sidebar fixed left-0 top-0 w-64 h-full bg-white shadow-xl z-40">
-            <div class="p-6 border-b border-gray-200">
-                <div class="logo text-2xl">GROKEY</div>
-                <p class="text-sm text-gray-500 mt-1">Admin Panel</p>
-            </div>
-            
-            <nav class="p-4 space-y-2">
-                <button id="nav-dashboard" onclick="showAdminSection('dashboard')" class="sidebar-active w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 flex items-center">
-                    <span class="mr-3">📊</span>
-                    Dashboard
-                </button>
-                
-                <button id="nav-users" onclick="showAdminSection('users')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">👥</span>
-                    User Management
-                </button>
-                
-                <button id="nav-books" onclick="showAdminSection('books')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">📚</span>
-                    Book Management
-                </button>
-                
-                <button id="nav-transactions" onclick="showAdminSection('transactions')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">💰</span>
-                    Transactions
-                </button>
-                
-                <button id="nav-orders" onclick="showAdminSection('orders')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">📦</span>
-                    Order Management
-                </button>
-                
-                <button id="nav-reports" onclick="showAdminSection('reports')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">📈</span>
-                    Reports & Analytics
-                </button>
-                
-                <button id="nav-settings" onclick="showAdminSection('settings')" class="w-full text-left px-4 py-3 rounded-xl font-medium transition-all duration-200 hover:bg-gray-100 flex items-center">
-                    <span class="mr-3">⚙️</span>
-                    Settings
-                </button>
-            </nav>
-            
-            <div class="absolute bottom-4 left-4 right-4">
-                <button onclick="adminLogout()" class="w-full px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-all duration-200 flex items-center justify-center">
-                    <span class="mr-2">🚪</span>
-                    Logout
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="ml-64 min-h-screen">
-            <!-- Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-                <div>
-                    <h1 id="pageTitle" class="text-2xl font-bold text-gray-800">Dashboard</h1>
-                    <p id="pageSubtitle" class="text-gray-600">Overview of GROKEY marketplace</p>
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-gray-100">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                        </svg>
-                    </button>
-                    
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                            <span class="text-white text-sm font-semibold">A</span>
-                        </div>
-                        <span class="font-medium text-gray-700">Admin</span>
+<body class="bg-gray-50 font-sans">
+    <!-- Main App -->
+    <div id="mainApp">
+        <!-- Header -->
+        <header class="bg-white shadow-sm sticky top-0 z-40">
+            <div class="px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">📚 GROKEY</h1>
+                        <p class="text-sm text-gray-500" id="headerSubtitle">Welcome back!</p>
+                    </div>
+                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span class="text-white font-semibold" id="userInitial">U</span>
                     </div>
                 </div>
-            </header>
+            </div>
+        </header>
 
-            <!-- Dashboard Section -->
-            <section id="dashboard-section" class="p-6">
+        <!-- Content Container -->
+        <div class="app-container">
+            <!-- Home Section -->
+            <section id="home-section" class="px-4 py-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Welcome to GROKEY</h2>
+                    <p class="text-gray-600">Discover and trade amazing books</p>
+                </div>
+
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <div class="stats-card">
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-2xl">
+                        <div class="text-2xl font-bold" id="totalBooks">0</div>
+                        <div class="text-sm opacity-90">Total Books</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-2xl">
+                        <div class="text-2xl font-bold" id="myBooksCount">0</div>
+                        <div class="text-sm opacity-90">My Books</div>
+                    </div>
+                </div>
+
+                <!-- Featured Books -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">📖 Featured Books</h3>
+                    <div id="featuredBooks" class="space-y-3">
+                        <!-- Featured books will be populated here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Books Section -->
+            <section id="mybooks-section" class="hidden px-4 py-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">My Books</h2>
+                    <p class="text-gray-600">Books you've listed for sale</p>
+                </div>
+                
+                <div id="myBooksList" class="space-y-4">
+                    <!-- User's books will be populated here -->
+                </div>
+            </section>
+
+            <!-- Sell Book Section -->
+            <section id="sell-section" class="hidden px-4 py-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Sell Your Book</h2>
+                    <p class="text-gray-600">Scan with AI or enter manually</p>
+                </div>
+
+                <!-- AI Scanner Interface -->
+                <div id="aiScanner" class="mb-6">
+                    <div class="bg-gradient-to-r from-purple-500 to-blue-600 text-white p-6 rounded-2xl mb-4">
                         <div class="flex items-center justify-between mb-4">
                             <div>
-                                <p class="text-gray-600 text-sm font-medium">Total Users</p>
-                                <p id="totalUsers" class="stats-number">0</p>
+                                <h3 class="text-lg font-semibold">📷 AI Book Scanner</h3>
+                                <p class="text-sm opacity-90">Point camera at book cover</p>
                             </div>
-                            <div class="text-4xl">👥</div>
+                            <div class="text-3xl">🤖</div>
                         </div>
-                        <p class="stats-change text-sm text-gray-500">No users yet</p>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <p class="text-gray-600 text-sm font-medium">Books Listed</p>
-                                <p id="totalBooksAdmin" class="stats-number">0</p>
-                            </div>
-                            <div class="text-4xl">📚</div>
-                        </div>
-                        <p class="stats-change text-sm text-gray-500">No books listed</p>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <p class="text-gray-600 text-sm font-medium">Transactions</p>
-                                <p id="totalTransactions" class="stats-number">0</p>
-                            </div>
-                            <div class="text-4xl">💰</div>
-                        </div>
-                        <p class="stats-change text-sm text-gray-500">No transactions yet</p>
-                    </div>
-                    
-                    <div class="stats-card">
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <p class="text-gray-600 text-sm font-medium">Revenue</p>
-                                <p class="stats-number">$0.00</p>
-                            </div>
-                            <div class="text-4xl">📈</div>
-                        </div>
-                        <p class="stats-change text-sm text-gray-500">No revenue yet</p>
+                        <button onclick="startScanning()" id="scanButton" class="w-full bg-white text-purple-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition">
+                            Start Scanning
+                        </button>
                     </div>
                 </div>
 
-                <!-- Charts and Activity -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Sales Overview</h3>
-                        <div class="chart-container">
-                            <canvas id="salesChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Book Categories</h3>
-                        <div class="chart-container">
-                            <canvas id="categoryChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="card">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
-                    <div id="recentActivity" class="space-y-3">
-                        <div class="empty-state">
-                            <div class="empty-icon">📊</div>
-                            <div class="empty-title">No recent activity</div>
-                            <div class="empty-description">Activity will appear here as users interact with the platform</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- User Management Section -->
-            <section id="users-section" class="hidden p-6">
-                <div class="card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-800">Registered Users</h3>
-                        <div class="flex space-x-3">
-                            <input type="text" placeholder="Search users..." class="form-input w-64">
-                            <button class="btn btn-primary">Add User</button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>User</th>
-                                    <th>Email</th>
-                                    <th>Books Listed</th>
-                                    <th>Join Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTable">
-                                <tr>
-                                    <td colspan="6" class="py-8">
-                                        <div class="empty-state">
-                                            <div class="empty-icon">👥</div>
-                                            <div class="empty-title">No users registered yet</div>
-                                            <div class="empty-description">Users will appear here when they register on the platform</div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Book Management Section -->
-            <section id="books-section" class="hidden p-6">
-                <div class="card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-800">Listed Books</h3>
-                        <div class="flex space-x-3">
-                            <input type="text" id="bookSearch" placeholder="Search books..." class="form-input w-64">
-                            <button onclick="BookManagement.showAddModal()" class="btn btn-primary">Add Book</button>
-                        </div>
-                    </div>
-                    
-                    <div id="booksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        <div class="col-span-full">
-                            <div class="empty-state">
-                                <div class="empty-icon">📚</div>
-                                <div class="empty-title">No books listed yet</div>
-                                <div class="empty-description">Books will appear here when users list them for sale</div>
-                                <button onclick="BookManagement.showAddModal()" class="btn btn-primary mt-4">
-                                    Add First Book
-                                </button>
+                <!-- Camera View (Hidden by default) -->
+                <div id="cameraView" class="hidden mb-6">
+                    <div class="bg-black rounded-2xl p-4 relative overflow-hidden" style="height: 300px;">
+                        <div class="absolute inset-4 border-2 border-white rounded-xl opacity-50"></div>
+                        <div class="absolute inset-8 border-2 border-green-400 rounded-lg animate-pulse"></div>
+                        <div class="flex items-center justify-center h-full">
+                            <div class="text-center text-white">
+                                <div class="text-4xl mb-2" id="scanningIcon">📷</div>
+                                <p class="text-sm" id="scanningText">Position book in frame</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Transactions Section -->
-            <section id="transactions-section" class="hidden p-6">
-                <div class="card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-800">Transaction History</h3>
-                        <div class="flex space-x-3">
-                            <select class="select">
-                                <option value="">All Statuses</option>
-                                <option value="Completed">Completed</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Failed">Failed</option>
-                            </select>
-                            <button onclick="exportReport('transactions')" class="btn btn-secondary">Export CSV</button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Transaction ID</th>
-                                    <th>Book</th>
-                                    <th>Buyer</th>
-                                    <th>Seller</th>
-                                    <th>Amount</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactionsTable">
-                                <tr>
-                                    <td colspan="7" class="py-8">
-                                        <div class="empty-state">
-                                            <div class="empty-icon">💰</div>
-                                            <div class="empty-title">No transactions yet</div>
-                                            <div class="empty-description">Transactions will appear here when users buy and sell books</div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Orders Section -->
-            <section id="orders-section" class="hidden p-6">
-                <div class="card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-xl font-semibold text-gray-800">Order Management</h3>
-                        <div class="flex space-x-3">
-                            <select id="orderStatusFilter" onchange="OrderManagement.filter()" class="select">
-                                <option value="">All Orders</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Processing">Processing</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
-                            </select>
-                            <button onclick="exportReport('orders')" class="btn btn-secondary">Export CSV</button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>Customer</th>
-                                    <th>Book</th>
-                                    <th>Amount</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Update Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ordersTable">
-                                <tr>
-                                    <td colspan="7" class="py-8">
-                                        <div class="empty-state">
-                                            <div class="empty-icon">📦</div>
-                                            <div class="empty-title">No orders yet</div>
-                                            <div class="empty-description">Orders will appear here when users make purchases</div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Reports Section -->
-            <section id="reports-section" class="hidden p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Revenue</h3>
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">User Growth</h3>
-                        <div class="chart-container">
-                            <canvas id="userGrowthChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="card text-center">
-                        <div class="text-4xl mb-4">👥</div>
-                        <h4 class="text-lg font-semibold text-gray-800 mb-2">User Report</h4>
-                        <p class="text-gray-600 mb-4">Export detailed user analytics and registration data</p>
-                        <button onclick="exportReport('users')" class="btn btn-primary w-full">Export Users</button>
-                    </div>
-                    
-                    <div class="card text-center">
-                        <div class="text-4xl mb-4">📚</div>
-                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Books Report</h4>
-                        <p class="text-gray-600 mb-4">Download comprehensive book listing and sales data</p>
-                        <button onclick="exportReport('books')" class="btn btn-primary w-full">Export Books</button>
-                    </div>
-                    
-                    <div class="card text-center">
-                        <div class="text-4xl mb-4">💰</div>
-                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Financial Report</h4>
-                        <p class="text-gray-600 mb-4">Generate detailed transaction and revenue reports</p>
-                        <button onclick="exportReport('transactions')" class="btn btn-primary w-full">Export Transactions</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Settings Section -->
-            <section id="settings-section" class="hidden p-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-6">Platform Settings</h3>
-                        <form class="space-y-4">
-                            <div class="form-group">
-                                <label class="form-label">Platform Name</label>
-                                <input type="text" value="GROKEY" class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Commission Rate (%)</label>
-                                <input type="number" value="5" min="0" max="100" class="form-input">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Support Email</label>
-                                <input type="email" value="support@grokey.com" class="form-input">
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Save Settings</button>
-                        </form>
-                    </div>
-                    
-                    <div class="card">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-6">AI Recognition Settings</h3>
-                        <form class="space-y-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div>
-                                    <p class="font-medium text-gray-800">Enable AI Book Recognition</p>
-                                    <p class="text-sm text-gray-600">Automatically detect book details from images</p>
-                                </div>
-                                <input type="checkbox" checked class="w-5 h-5 text-blue-600">
-                            </div>
-                            
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                                <div>
-                                    <p class="font-medium text-gray-800">Auto-fill Book Information</p>
-                                    <p class="text-sm text-gray-600">Automatically populate book details</p>
-                                </div>
-                                <input type="checkbox" checked class="w-5 h-5 text-blue-600">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label class="form-label">Recognition Confidence Threshold</label>
-                                <input type="range" min="50" max="100" value="85" class="w-full">
-                                <div class="flex justify-between text-sm text-gray-500 mt-1">
-                                    <span>50%</span>
-                                    <span>85%</span>
-                                    <span>100%</span>
-                                </div>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary">Update AI Settings</button>
-                        </form>
+                        <button onclick="stopScanning()" class="absolute top-4 right-4 bg-red-500 text-white w-10 h-10 rounded-full hover:bg-red-600">
+                            ✕
+                        </button>
                     </div>
                 </div>
                 
-                <div class="card mt-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-6">System Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="text-center p-4 bg-gray-50 rounded-xl">
-                            <div class="text-2xl font-bold text-blue-600 mb-2">v2.1.0</div>
-                            <p class="text-sm text-gray-600">Platform Version</p>
+                <form id="sellBookForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Book Title *</label>
+                        <input type="text" id="bookTitle" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Author *</label>
+                        <input type="text" id="bookAuthor" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                            <select id="bookCategory" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                                <option value="">Select Category</option>
+                                <option value="Fiction">Fiction</option>
+                                <option value="Non-Fiction">Non-Fiction</option>
+                                <option value="Academic">Academic</option>
+                                <option value="Children">Children</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Mystery">Mystery</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price ($) *</label>
+                            <input type="number" id="bookPrice" required min="0" step="0.01" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Condition *</label>
+                        <select id="bookCondition" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Condition</option>
+                            <option value="New">New</option>
+                            <option value="Like New">Like New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                        <textarea id="bookDescription" rows="3" placeholder="Describe the book..." class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-green-600 text-white py-4 rounded-xl font-semibold hover:bg-green-700 transition">
+                        📚 List My Book
+                    </button>
+                </form>
+            </section>
+
+            <!-- New Books Section -->
+            <section id="newbooks-section" class="hidden px-4 py-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">New Books</h2>
+                    <p class="text-gray-600">Latest additions to the marketplace</p>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="flex gap-2">
+                        <input type="text" id="searchInput" placeholder="Search books..." class="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500">
+                        <button onclick="filterBooks()" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700">
+                            🔍
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="newBooksList" class="space-y-4">
+                    <!-- New books will be populated here -->
+                </div>
+            </section>
+
+            <!-- My Account Section -->
+            <section id="account-section" class="hidden px-4 py-6">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">My Account</h2>
+                    <p class="text-gray-600">Your profile and selling stats</p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-sm mb-6">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-white text-xl font-bold" id="profileInitial">B</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800" id="profileName">Book Seller</h3>
+                            <p class="text-gray-600">GROKEY Member</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-2xl mr-3">📱</span>
+                            <div>
+                                <p class="text-sm text-gray-600">Phone</p>
+                                <p class="font-medium" id="userPhone">+1 (555) 123-4567</p>
+                            </div>
                         </div>
                         
-                        <div class="text-center p-4 bg-gray-50 rounded-xl">
-                            <div class="text-2xl font-bold text-green-600 mb-2">99.9%</div>
-                            <p class="text-sm text-gray-600">System Uptime</p>
+                        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-2xl mr-3">📧</span>
+                            <div>
+                                <p class="text-sm text-gray-600">Email</p>
+                                <p class="font-medium" id="userEmail">seller@grokey.com</p>
+                            </div>
                         </div>
                         
-                        <div class="text-center p-4 bg-gray-50 rounded-xl">
-                            <div class="text-2xl font-bold text-purple-600 mb-2">2.3GB</div>
-                            <p class="text-sm text-gray-600">Storage Used</p>
+                        <div class="flex items-center p-3 bg-gray-50 rounded-xl">
+                            <span class="text-2xl mr-3">📍</span>
+                            <div>
+                                <p class="text-sm text-gray-600">Address</p>
+                                <p class="font-medium" id="userAddress">123 Book Street, Reading City, RC 12345</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Selling Stats -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-2xl text-center">
+                        <div class="text-2xl font-bold" id="accountBooksListed">0</div>
+                        <div class="text-sm opacity-90">Books Listed</div>
+                    </div>
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-4 rounded-2xl text-center">
+                        <div class="text-2xl font-bold" id="accountBooksSold">0</div>
+                        <div class="text-sm opacity-90">Books Sold</div>
+                    </div>
+                </div>
             </section>
-        </main>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
+            <div class="flex justify-around items-center">
+                <button onclick="showSection('home')" class="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-blue-600 transition" id="nav-home">
+                    <span class="text-xl mb-1">🏠</span>
+                    <span class="text-xs">Home</span>
+                </button>
+                
+                <button onclick="showSection('mybooks')" class="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-blue-600 transition" id="nav-mybooks">
+                    <span class="text-xl mb-1">📚</span>
+                    <span class="text-xs">My Books</span>
+                </button>
+                
+                <button onclick="showSection('sell')" class="flex flex-col items-center py-2 px-3 text-white bg-blue-600 rounded-full w-14 h-14 hover:bg-blue-700 transition" id="nav-sell">
+                    <span class="text-2xl">➕</span>
+                </button>
+                
+                <button onclick="showSection('newbooks')" class="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-blue-600 transition" id="nav-newbooks">
+                    <span class="text-xl mb-1">🆕</span>
+                    <span class="text-xs">New Books</span>
+                </button>
+                
+                <button onclick="showSection('account')" class="flex flex-col items-center py-2 px-3 text-gray-500 hover:text-blue-600 transition" id="nav-account">
+                    <span class="text-xl mb-1">👤</span>
+                    <span class="text-xs">Account</span>
+                </button>
+            </div>
+        </nav>
     </div>
 
     <!-- Notification -->
-    <div id="notification" class="notification hidden">
-        <span id="notificationText"></span>
+    <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg hidden z-50">
+        <span id="notificationText">Success!</span>
     </div>
 
-    <!-- Load JavaScript -->
-    <script src="script.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e97d4370cef361',t:'MTc1Nzc4NTg1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    <script>
+        // Sample data
+        let books = [
+            {
+                id: 1,
+                title: "The Great Gatsby",
+                author: "F. Scott Fitzgerald",
+                category: "Fiction",
+                price: 12.99,
+                condition: "Good",
+                description: "Classic American novel",
+                owner: "demo",
+                dateAdded: new Date()
+            },
+            {
+                id: 2,
+                title: "Introduction to Algorithms",
+                author: "Thomas H. Cormen",
+                category: "Academic",
+                price: 89.99,
+                condition: "Like New",
+                description: "Computer science textbook",
+                owner: "other",
+                dateAdded: new Date(Date.now() - 86400000)
+            },
+            {
+                id: 3,
+                title: "Harry Potter and the Sorcerer's Stone",
+                author: "J.K. Rowling",
+                category: "Children",
+                price: 8.99,
+                condition: "Good",
+                description: "First book in the series",
+                owner: "other",
+                dateAdded: new Date(Date.now() - 172800000)
+            }
+        ];
+
+        // AI Book Database for recognition
+        const aiBookDatabase = [
+            { title: "To Kill a Mockingbird", author: "Harper Lee", category: "Fiction", price: 14.99 },
+            { title: "1984", author: "George Orwell", category: "Fiction", price: 13.99 },
+            { title: "The Catcher in the Rye", author: "J.D. Salinger", category: "Fiction", price: 12.99 },
+            { title: "Pride and Prejudice", author: "Jane Austen", category: "Romance", price: 11.99 },
+            { title: "The Lord of the Rings", author: "J.R.R. Tolkien", category: "Fiction", price: 24.99 },
+            { title: "Calculus: Early Transcendentals", author: "James Stewart", category: "Academic", price: 299.99 },
+            { title: "The Very Hungry Caterpillar", author: "Eric Carle", category: "Children", price: 8.99 },
+            { title: "Gone Girl", author: "Gillian Flynn", category: "Mystery", price: 15.99 }
+        ];
+
+        let currentUser = null;
+        let currentSection = 'home';
+        let isScanning = false;
+
+        // AI Scanning Functions
+        function startScanning() {
+            if (isScanning) return;
+            
+            isScanning = true;
+            document.getElementById('aiScanner').classList.add('hidden');
+            document.getElementById('cameraView').classList.remove('hidden');
+            
+            // Simulate camera scanning process
+            let scanStep = 0;
+            const scanSteps = [
+                { icon: '📷', text: 'Initializing camera...' },
+                { icon: '🔍', text: 'Detecting book cover...' },
+                { icon: '🤖', text: 'AI analyzing image...' },
+                { icon: '✅', text: 'Book recognized!' }
+            ];
+            
+            const scanInterval = setInterval(() => {
+                if (scanStep < scanSteps.length) {
+                    document.getElementById('scanningIcon').textContent = scanSteps[scanStep].icon;
+                    document.getElementById('scanningText').textContent = scanSteps[scanStep].text;
+                    scanStep++;
+                } else {
+                    clearInterval(scanInterval);
+                    completeScanning();
+                }
+            }, 800);
+        }
+
+        function completeScanning() {
+            // Randomly select a book from AI database
+            const recognizedBook = aiBookDatabase[Math.floor(Math.random() * aiBookDatabase.length)];
+            
+            // Fill form with recognized data
+            document.getElementById('bookTitle').value = recognizedBook.title;
+            document.getElementById('bookAuthor').value = recognizedBook.author;
+            document.getElementById('bookCategory').value = recognizedBook.category;
+            document.getElementById('bookPrice').value = recognizedBook.price;
+            
+            // Hide camera and show form
+            stopScanning();
+            showNotification(`📚 Book recognized: "${recognizedBook.title}"!`);
+        }
+
+        function stopScanning() {
+            isScanning = false;
+            document.getElementById('cameraView').classList.add('hidden');
+            document.getElementById('aiScanner').classList.remove('hidden');
+        }
+
+        // Show different sections
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            
+            // Remove active class from all nav buttons
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('bottom-nav-active');
+                if (!btn.id.includes('sell')) {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('text-gray-500');
+                }
+            });
+            
+            // Show selected section
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            
+            // Update nav button
+            const navBtn = document.getElementById(`nav-${section}`);
+            if (navBtn && !navBtn.id.includes('sell')) {
+                navBtn.classList.add('bottom-nav-active');
+            }
+            
+            // Update header
+            const subtitles = {
+                'home': 'Welcome back!',
+                'mybooks': 'Your listed books',
+                'sell': 'List a new book',
+                'newbooks': 'Latest additions',
+                'account': 'Manage your profile'
+            };
+            document.getElementById('headerSubtitle').textContent = subtitles[section];
+            
+            currentSection = section;
+            
+            // Load section-specific content
+            if (section === 'home') {
+                renderFeaturedBooks();
+                updateStats();
+            } else if (section === 'mybooks') {
+                renderMyBooks();
+            } else if (section === 'newbooks') {
+                renderNewBooks();
+            } else if (section === 'account') {
+                updateAccountStats();
+            }
+        }
+
+        // Render featured books
+        function renderFeaturedBooks() {
+            const container = document.getElementById('featuredBooks');
+            const featured = books.slice(0, 3);
+            
+            container.innerHTML = featured.map(book => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                        <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${book.category}</span>
+                        <button onclick="buyBook(${book.id})" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-blue-700">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render user's books
+        function renderMyBooks() {
+            const container = document.getElementById('myBooksList');
+            const myBooks = books.filter(book => book.owner === 'demo');
+            
+            if (myBooks.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-4xl mb-4">📚</div>
+                        <p class="text-gray-600 mb-4">You haven't listed any books yet</p>
+                        <button onclick="showSection('sell')" class="bg-blue-600 text-white px-6 py-3 rounded-xl">
+                            List Your First Book
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = myBooks.map(book => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                        <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">${book.condition}</span>
+                        <button onclick="removeBook(${book.id})" class="text-red-600 text-sm hover:text-red-800">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Render new books
+        function renderNewBooks() {
+            const container = document.getElementById('newBooksList');
+            const sortedBooks = [...books].sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+            
+            container.innerHTML = sortedBooks.map(book => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                        <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                    <p class="text-xs text-gray-500 mb-3">${book.description}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${book.category}</span>
+                            <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">${book.condition}</span>
+                        </div>
+                        <button onclick="buyBook(${book.id})" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-blue-700">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Handle sell book form
+        document.getElementById('sellBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newBook = {
+                id: Date.now(),
+                title: document.getElementById('bookTitle').value,
+                author: document.getElementById('bookAuthor').value,
+                category: document.getElementById('bookCategory').value,
+                price: parseFloat(document.getElementById('bookPrice').value),
+                condition: document.getElementById('bookCondition').value,
+                description: document.getElementById('bookDescription').value || 'No description provided',
+                owner: 'demo',
+                dateAdded: new Date()
+            };
+            
+            books.push(newBook);
+            this.reset();
+            
+            showNotification('Book listed successfully! 📚');
+            updateStats();
+        });
+
+        // Buy book function
+        function buyBook(id) {
+            const book = books.find(b => b.id === id);
+            if (book) {
+                showNotification(`Successfully purchased "${book.title}"! 🎉`);
+            }
+        }
+
+        // Remove book function
+        function removeBook(id) {
+            books = books.filter(book => book.id !== id);
+            renderMyBooks();
+            updateStats();
+            showNotification('Book removed successfully');
+        }
+
+        // Filter books
+        function filterBooks() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredBooks = books.filter(book => 
+                book.title.toLowerCase().includes(searchTerm) || 
+                book.author.toLowerCase().includes(searchTerm)
+            );
+            
+            const container = document.getElementById('newBooksList');
+            container.innerHTML = filteredBooks.map(book => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm">
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${book.title}</h4>
+                        <span class="text-lg font-bold text-green-600">$${book.price}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">by ${book.author}</p>
+                    <p class="text-xs text-gray-500 mb-3">${book.description}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-2">
+                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${book.category}</span>
+                            <span class="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">${book.condition}</span>
+                        </div>
+                        <button onclick="buyBook(${book.id})" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm hover:bg-blue-700">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update stats
+        function updateStats() {
+            document.getElementById('totalBooks').textContent = books.length;
+            document.getElementById('myBooksCount').textContent = books.filter(b => b.owner === 'demo').length;
+        }
+
+        // Update account stats
+        function updateAccountStats() {
+            const myBooks = books.filter(b => b.owner === 'demo');
+            document.getElementById('accountBooksListed').textContent = myBooks.length;
+            document.getElementById('accountBooksSold').textContent = Math.floor(myBooks.length * 0.3); // Simulate some sales
+        }
+
+
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            
+            text.textContent = message;
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-xl shadow-lg z-50 ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
+            
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show main app immediately (no login required)
+            document.getElementById('mainApp').classList.remove('hidden');
+            showSection('home');
+            updateStats();
+        });
+
+        // Search on enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                filterBooks();
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97e85e05c481377e',t:'MTc1Nzc3NDA4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
